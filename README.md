@@ -2,12 +2,12 @@
 
 ![Project Logo](./project_logo.png)
 
-[![GitHub stars](https://img.shields.io/github/stars/holden_lin/AIcoding4AI.svg?style=social&label=Star)](https://github.com/holden_lin/AIcoding4AI/)
+[![GitHub stars](https://img.shields.io/github/stars/Holden-Lin/AIcoding4AI.svg?style=social&label=Star)](https://github.com/Holden-Lin/AIcoding4AI/)
 
-[![GitHub forks](https://img.shields.io/github/forks/holden_lin/AIcoding4AI.svg?style=social&label=Fork)](https://github.com/holden_lin/AIcoding4AI/)
+[![GitHub forks](https://img.shields.io/github/forks/Holden-Lin/AIcoding4AI.svg?style=social&label=Fork)](https://github.com/Holden-Lin/AIcoding4AI/)
 
-[![GitHub issues](https://img.shields.io/github/issues/holden_lin/AIcoding4AI.svg)](https://github.com/holden_lin/AIcoding4AI/issues)
-[![License](https://img.shields.io/github/license/holden_lin/AIcoding4AI.svg)](LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Holden-Lin/AIcoding4AI.svg)](https://github.com/Holden-Lin/AIcoding4AI/issues)
+[![License](https://img.shields.io/github/license/Holden-Lin/AIcoding4AI.svg)](LICENSE)
 
 ## Introduction
 
