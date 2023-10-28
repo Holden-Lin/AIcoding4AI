@@ -4,6 +4,7 @@ from dataset.mnist import load_mnist
 from common.functions import sigmoid, softmax
 
 
+# 本代码的目的是学习类，并了解简单的神经网络推理，代码改写自：https://github.com/oreilly-japan/deep-learning-from-scratch/tree/master/ch03
 class SimpleNN:
     """
     一个用于图像分类的简单神经网络类。
