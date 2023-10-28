@@ -11,9 +11,8 @@
 
 ## Introduction
 
-Briefly describe what this project does and what problem it solves.
+This repo is for following courses and assignments of Huoshui AI coding course for Python, based on which I try to use deep learning samples to illustrate both the python syntax and basic neural network algorithms.
 
-![Screenshot or Demo](path/to/screenshot-or-demo.gif)
 
 ## Features
 
