@@ -6,6 +6,14 @@ Python Fire makes using a Python REPL easier by setting up the REPL with the mod
 and variables you'll need already imported and created.
 """
 
+# How to interact with this file in terminal
+# 1. python learn_fire.py --help
+# 2. python learn_fire.py Holden > this will replace the argument name with "Holden"
+# 3. python learn_fire.py --name=Holden > this achieves the same effect
+# 4. python learn_fire.py Holden How are you?
+#       > The first argument "Holden" is mapped to the name parameter \
+#         The remaining arguments "How" and "are you?" are collected by the *kwargs parameter as a tuple.
+
 # conda install -c conda-forge fire
 import fire
 
@@ -19,10 +27,3 @@ def hello(name="World", *kwargs):
 if __name__ == "__main__":
     # 使用fire库为hello函数生成命令行接口
     fire.Fire(hello)
-
-
-# How to interact with this file in terminal
-# 1. python learn_fire.py --help
-# 2. python learn_fire.py Holden > this will replace the argument name with "Holden"
-# 3. python learn_fire.py --name=Holden > this achieves the same effect
-# 4. python learn_fire.py Holden How are you? > this

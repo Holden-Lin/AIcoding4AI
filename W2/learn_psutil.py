@@ -1,10 +1,11 @@
 # psutil: A cross-platform process and system utilities module for Python
-
+# conda install -c conda-forge psutil
 import psutil as ps
 
-class my_computer():
+
+class my_computer:
     def __init__(self):
-        self.cores = ps.cpu_count(logical=False) 
+        self.cores = ps.cpu_count(logical=False)
         self.logical_cores = None
         self.memories = ps.virtual_memory()
 
@@ -24,11 +25,9 @@ class my_computer():
         print(f"可用内存: {self.memories.available / (1024 ** 3):.2f} GB")
         print(f"内存使用率: {self.memories.percent}%")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     my_computer = my_computer()
     my_computer.get_cpu_usage()
     my_computer.show_cpus()
     my_computer.show_memoreis()
-
-
-   
