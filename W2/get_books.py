@@ -32,17 +32,28 @@ def get_book_summary(isbn: str) -> str:
     return data.get("summary")
 
 
+def get_book_test(name):
+    url = f"https://api.douban.com/v2/book/search?q={name}&fields=id,title,pubdate"
+
+    response = requests.post(
+        url,
+        data={"apikey": db_api_key},
+        headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.203"
+        },
+    )
+    data = response.json()
+
+    return data
+
+
 def book_summary(isbn: str = "9787521748536"):
     data = get_book_summary(isbn)
     print(data)
 
 
-# 如果脚本作为主程序运行，那么获取指定ISBN的书籍摘要并打印
-if __name__ == "__main__":
-    fire.Fire(book_summary)
+# # 如果脚本作为主程序运行，那么获取指定ISBN的书籍摘要并打印
+# if __name__ == "__main__":
+#     fire.Fire(book_summary)
 
-"""
-需要 pip install requests
-python book_summary.py --isbn 9787521748536
-此命令将使用提供的ISBN获取书籍摘要
-"""
+print(get_book_test("自私的基因"))
