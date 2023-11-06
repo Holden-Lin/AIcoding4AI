@@ -16,7 +16,7 @@ db_api_key = os.environ["db_api_key"]
 print("* db api key loaded")
 
 
-class BooksRBPromoter:
+class GetBookInfo:
     def __init__(self, api_key):
         self.db_api_key = api_key
 
@@ -70,13 +70,14 @@ class BooksRBPromoter:
             print("No books found.")
             return None
 
-        matched_book = None
+        most_recent_date_exact_match = datetime.min
+        matched_book_exact_match = None
+        most_recent_date_partial_match = datetime.min
         most_matched_count = 0
-        most_recent_date = datetime.min
+        matched_book_partial_match = None
         books_to_check = 10
         counter = 0
 
-        print("Books returned:")
         for book in data["books"]:
             pubdate_str = book.get("pubdate", "")
             pub_date = self.parse_date(pubdate_str) if pubdate_str else datetime.min
@@ -86,26 +87,29 @@ class BooksRBPromoter:
 
             if book["title"] == name:
                 print("* This is an exact match!")
-                if pub_date > most_recent_date:
+                if pub_date > most_recent_date_exact_match:
                     print("* Comparing the pubdate and choose the recent one")
-                    most_recent_date = pub_date
-                    matched_book = book
+                    most_recent_date_exact_match = pub_date
+                    matched_book_exact_match = book
             else:
                 print("* This is not an exact match")
                 match_count = sum(1 for char in name if char in book["title"])
-                print(f"* {match_count} words are the matched")
+                print(f"* {match_count} characters are matched")
 
                 if match_count > most_matched_count or (
-                    match_count == most_matched_count and pub_date > most_recent_date
+                    match_count == most_matched_count
+                    and pub_date > most_recent_date_partial_match
                 ):
                     most_matched_count = match_count
-                    matched_book = book
-                    most_recent_date = pub_date
+                    matched_book_partial_match = book
+                    most_recent_date_partial_match = pub_date
 
             counter += 1
             if counter >= books_to_check:
                 print("* Tired after checking 10 books. Let's stop!")
                 break
+
+        matched_book = matched_book_exact_match or matched_book_partial_match
 
         if matched_book:
             print(
@@ -124,6 +128,6 @@ class BooksRBPromoter:
             return None
 
 
-books_rb_promoter = BooksRBPromoter(db_api_key)
-book_id = books_rb_promoter.get_book_info("自私的基因", "isbn13", "author")
-print(f"The ID returned is: {book_id}")
+# books_rb_promoter = GetBookInfo(db_api_key)
+# book_id = books_rb_promoter.get_book_info("自私的基因", "isbn13", "author")
+# print(f"The ID returned is: {book_id}")
