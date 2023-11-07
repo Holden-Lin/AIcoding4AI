@@ -1,8 +1,8 @@
 import fire
 import zhipuai
-import os
 from dotenv import load_dotenv, find_dotenv
-from GetBookInfo import GetBookInfo
+import os
+from .GetBookInfo import GetBookInfo
 
 
 class BookPromoter:
