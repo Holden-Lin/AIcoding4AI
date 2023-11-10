@@ -1,3 +1,5 @@
+console.log("Script loaded")
+
 document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const generalInput = document.getElementById('general-input');
@@ -24,30 +26,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Functions
+    // async function generateGeneralText() {
+    //     // 获取灵感生成中的元素
+    //     const loadingDiv = document.getElementById('general-loading');
+    //     // 展示灵感生成中 为block
+    //     loadingDiv.style.display = 'block';
+    //     console.log("Loading display set to block");
+
+
+    //     try {
+
+    //         const response = await fetch('/gen', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 book_name: generalInput.value
+    //             })
+    //         });
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const data = await response.json();
+
+    //         // replace the \\n from llm api's original reponse with line break
+    //         generalOutput.innerHTML = data.intro.replace(/\\n/g, '<br>');
+
+    //         copyTextBtn.style.display = 'block';
+    //         // 灵感生成中消失
+    //         loadingDiv.style.display = 'None';
+    //     } catch (error) {
+    //         console.error('There was a problem with the fetch operation:', error);
+    //         generalOutput.textContent = 'Error generating text. Please try again.';
+    //     }
+    // }
+
     async function generateGeneralText() {
-        try {
-            const response = await fetch('/gen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    book_name: generalInput.value
-                })
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+        // Elements and loading indication
+        const loadingDiv = document.getElementById('general-loading');
+        loadingDiv.style.display = 'block';
+        console.log("Loading display set to block");
 
-            // replace the \\n from llm api's original reponse with line break
-            generalOutput.innerHTML = data.intro.replace(/\\n/g, '<br>');
+        // Clear previous output
+        generalOutput.innerHTML = '';
 
-            copyTextBtn.style.display = 'block'; // Make sure 'copyTextBtn' is the correct ID for the copy button
-        } catch (error) {
-            console.error('There was a problem with the fetch operation:', error);
+        // Encode the book name for use in a query string
+        const bookName = encodeURIComponent(generalInput.value);
+        const url = `/gen?book_name=${bookName}`;
+
+        const eventSource = new EventSource(url);
+
+        // Handle a message event
+        eventSource.onmessage = function (event) {
+            // Append the new data to the output
+            generalOutput.innerHTML += event.data.replace(/\\n/g, '<br>');
+        };
+
+        // Handle an error event
+        eventSource.onerror = function (error) {
+            console.error('There was a problem with the event stream:', error);
             generalOutput.textContent = 'Error generating text. Please try again.';
-        }
+            eventSource.close(); // Close the connection
+            loadingDiv.style.display = 'none'; // Hide the loading indicator
+        };
+
+        // Optional: Handle stream completion (if the server sends a specific event to indicate this)
+        // Adjust this part according to your server-side implementation
+        eventSource.addEventListener('finish', () => {
+            eventSource.close(); // Close the connection
+            copyTextBtn.style.display = 'block'; // Show the copy text button
+            loadingDiv.style.display = 'none'; // Hide the loading indicator
+        });
     }
 
 

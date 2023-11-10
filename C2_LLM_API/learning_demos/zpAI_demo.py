@@ -31,6 +31,36 @@ def zhipuai_package_demo(key):
     print(response)
 
 
+def zhipuai_package_demo_sse(key):
+    # 设置zhipuai的api_key
+    zhipuai.api_key = key
+
+    # sse_invoke stream mode
+    response = zhipuai.model_api.sse_invoke(
+        model="chatglm_turbo",
+        prompt=[
+            {"role": "user", "content": "你好"},
+            {"role": "assistant", "content": "我是人工智能助手"},
+            {"role": "user", "content": "你叫什么名字"},
+            {"role": "assistant", "content": "我叫chatGLM"},
+            {"role": "user", "content": "请你用300字描述一下今天的心情"},
+        ],
+        temperature=0.9,
+    )
+    for event in response.events():
+        if event.event == "add":
+            # Print data continuously with controlled line breaks
+            print(event.data, end="")
+        elif event.event == "error" or event.event == "interrupted":
+            print("\nError or Interrupted:", event.data)
+        elif event.event == "finish":
+            # Print any final data or meta information if needed
+            print("\nFinished:", event.meta)
+            break  # Break the loop once the generation is done
+        else:
+            print("\nOther Event:", event.data)
+
+
 # 根据API密钥生成JWT令牌
 def generate_token(api_key: str, exp_seconds: int):
     try:
@@ -75,5 +105,4 @@ def requests_demo(key):
 
 
 if __name__ == "__main__":
-    zhipuai_package_demo(zp_api_key)
-    requests_demo(zp_api_key)
+    zhipuai_package_demo_sse(zp_api_key)

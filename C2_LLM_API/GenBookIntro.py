@@ -22,7 +22,7 @@ class BookPromoter:
 
         book_summary = book_info["summary"]
         prompt = (
-            "你是最火的小红书博主，现在请你基于书名和书籍简介，为下面这本书写一篇300-500字的小红书帖子，向粉丝推荐这本书。"
+            "你是最火的小红书博主，现在请你基于书名和书籍简介，为下面这本书写一篇150字的小红书帖子，向粉丝推荐这本书。"
             "请务必使用小红书的语言风格。\n"
             f"书名：{name}"
             f"书籍简介：{book_summary}"
@@ -30,20 +30,26 @@ class BookPromoter:
 
         zhipuai.api_key = self.zp_api_key
 
-        response = zhipuai.model_api.invoke(
+        response = zhipuai.model_api.sse_invoke(
             model="chatglm_turbo",
             prompt=[
                 {"role": "user", "content": f"{prompt}"},
             ],
             # 值越大，会使输出更随机
             temperature=0.8,
+            # incremental=True,
         )
 
-        if response["code"] == 200:
-            return response["data"]["choices"][0]["content"].strip('"')
-        else:
-            print("Failed to generate book introduction.")
-            return response
+        print("* yielding stream ouput")
+        for event in response.events():
+            if event.event == "add":
+                yield event.data
+            elif event.event in ["error", "interrupted"]:
+                yield f"\nError or Interrupted: {event.data}"
+                break
+            elif event.event == "finish":
+                print("* stream output finished")
+                break
 
 
 def main():

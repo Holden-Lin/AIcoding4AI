@@ -38,6 +38,17 @@ button:hover {
     background-color: #0056b3;
 }
 
+/* Adjust the margin around the buttons and output box */
+.button-container button,
+#copy-text,
+.output-box {
+    margin-top: 10px;
+    /* Adds 10px of space above each element */
+    margin-bottom: 10px;
+    /* Adds 10px of space below each element */
+}
+
+
 .output-box {
     background-color: #f7f7f7;
     border: 1px solid #ddd;
