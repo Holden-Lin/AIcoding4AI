@@ -43,12 +43,14 @@ class BookPromoter:
         print("* yielding stream ouput")
         for event in response.events():
             if event.event == "add":
-                yield event.data
+                yield f"data: {event.data}\n\n"
+                print(event.data, end="")
             elif event.event in ["error", "interrupted"]:
-                yield f"\nError or Interrupted: {event.data}"
+                yield f"data: Error or Interrupted: {event.data}\n\n"
                 break
             elif event.event == "finish":
                 print("* stream output finished")
+                yield f"data: Stream closed\n\n"  # Inform the client that the stream is closing
                 break
 
 

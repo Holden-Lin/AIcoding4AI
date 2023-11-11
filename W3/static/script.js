@@ -79,17 +79,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle a message event
         eventSource.onmessage = function (event) {
-            // Append the new data to the output
-            generalOutput.innerHTML += event.data.replace(/\\n/g, '<br>');
+            if (event.data === "Stream closed") {
+                console.log("Stream closed by the server");
+                eventSource.close();
+                copyTextBtn.style.display = 'block';
+                loadingDiv.style.display = 'none';
+                // Any additional cleanup here
+            } else {
+                // Normal handling of messages
+                console.log(event.data);
+                generalOutput.innerHTML += event.data.replace(/\n/g, '<br>');
+            }
         };
+
+        // eventSource.addEventListener('add', event => {
+        //     console.log(event.data);
+        //     generalOutput.innerHTML += event.data.replace(/\\n/g, '<br>');
+        // });
 
         // Handle an error event
         eventSource.onerror = function (error) {
             console.error('There was a problem with the event stream:', error);
-            generalOutput.textContent = 'Error generating text. Please try again.';
-            eventSource.close(); // Close the connection
-            loadingDiv.style.display = 'none'; // Hide the loading indicator
+            console.log('EventSource readyState:', eventSource.readyState);
+
+            if (eventSource.readyState === EventSource.CLOSED) {
+                console.log('EventSource connection was closed.');
+            } else if (eventSource.readyState === EventSource.CONNECTING) {
+                console.log('EventSource is trying to connect.');
+            } else {
+                console.log('EventSource is open.');
+            }
+
+            // Add a conditional check here to handle different states
+            if (eventSource.readyState !== EventSource.OPEN) {
+                generalOutput.textContent = 'Error generating text. Please try again.';
+                eventSource.close(); // Close the connection
+                loadingDiv.style.display = 'none'; // Hide the loading indicator
+            }
         };
+
 
         // Optional: Handle stream completion (if the server sends a specific event to indicate this)
         // Adjust this part according to your server-side implementation
