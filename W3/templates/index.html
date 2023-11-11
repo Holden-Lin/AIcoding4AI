@@ -38,21 +38,14 @@
         <section id="book-promotion-generation" class="tab-content" style="display:none;">
             <h2>书籍推广灵感生成</h2>
             <input type="text" id="book-name-input" placeholder="请输入书籍的名字...">
-            <div class="select-container">
-                <label for="source-selection">请选择书籍简介来源:</label>
-                <select id="source-selection">
-                    <option value="douban">自动从豆瓣获取</option>
-                    <option value="manual">您手动输入</option>
-                </select>
-            </div>
-            <textarea id="book-briefing-input" placeholder="请输入书籍简介..." style="display:none;"></textarea>
+
             <div class="button-container">
                 <button id="generate-book-text">生成灵感</button>
-
-                <button id="copy-book-text" style="display:none;">复制灵感</button>
             </div>
+
             <div id="book-output" class="output-box"></div>
             <div id="book-loading" class="loading-interface" style="display:none;">灵感生成中...</div>
+            <button id="copy-book-text" style="display:none;">复制灵感</button>
         </section>
     </main>
     <script src="../static/script.js"></script>

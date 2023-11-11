@@ -3,6 +3,7 @@ import zhipuai
 from dotenv import load_dotenv, find_dotenv
 import os
 from .GetBookInfo import GetBookInfo
+import json
 
 
 class BookPromoter:
@@ -40,17 +41,28 @@ class BookPromoter:
             # incremental=True,
         )
 
+        # print("* yielding stream ouput")
+        # for event in response.events():
+        #     if event.event == "add":
+        #         yield f"data: {event.data}\n\n"
+        #         print(event.data, end="")
+        #     elif event.event in ["error", "interrupted"]:
+        #         yield f"data: Error or Interrupted: {event.data}\n\n"
+        #         break
+        #     elif event.event == "finish":
+        #         print("* stream output finished")
+        #         yield f"data: Stream closed\n\n"  # Inform the client that the stream is closing
+        #         break
+
         print("* yielding stream ouput")
         for event in response.events():
             if event.event == "add":
-                yield f"data: {event.data}\n\n"
-                print(event.data, end="")
+                yield json.dumps(event.data)
             elif event.event in ["error", "interrupted"]:
-                yield f"data: Error or Interrupted: {event.data}\n\n"
+                yield f"Error or Interrupted: {json.dumps(event.data)}"
                 break
             elif event.event == "finish":
-                print("* stream output finished")
-                yield f"data: Stream closed\n\n"  # Inform the client that the stream is closing
+                yield f"{json.dumps({'message': 'Stream closed'})}"
                 break
 
 

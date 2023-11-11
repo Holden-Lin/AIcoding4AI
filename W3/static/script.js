@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bookNameInput = document.getElementById('book-name-input');
     const sourceSelection = document.getElementById('source-selection');
-    const bookBriefingInput = document.getElementById('book-briefing-input');
     const generateBookTextBtn = document.getElementById('generate-book-text');
     const copyBookTextBtn = document.getElementById('copy-book-text');
     const bookOutput = document.getElementById('book-output');
@@ -20,47 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     generateBookTextBtn.addEventListener('click', () => generateBookPromotionText());
     copyBookTextBtn.addEventListener('click', () => copyText(bookOutput));
-
-    sourceSelection.addEventListener('change', (e) => {
-        bookBriefingInput.style.display = e.target.value === 'manual' ? 'block' : 'none';
-    });
-
-    // Functions
-    // async function generateGeneralText() {
-    //     // 获取灵感生成中的元素
-    //     const loadingDiv = document.getElementById('general-loading');
-    //     // 展示灵感生成中 为block
-    //     loadingDiv.style.display = 'block';
-    //     console.log("Loading display set to block");
-
-
-    //     try {
-
-    //         const response = await fetch('/gen', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 book_name: generalInput.value
-    //             })
-    //         });
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         const data = await response.json();
-
-    //         // replace the \\n from llm api's original reponse with line break
-    //         generalOutput.innerHTML = data.intro.replace(/\\n/g, '<br>');
-
-    //         copyTextBtn.style.display = 'block';
-    //         // 灵感生成中消失
-    //         loadingDiv.style.display = 'None';
-    //     } catch (error) {
-    //         console.error('There was a problem with the fetch operation:', error);
-    //         generalOutput.textContent = 'Error generating text. Please try again.';
-    //     }
-    // }
 
 
     async function generateGeneralText() {
@@ -73,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         generalOutput.innerHTML = '';
 
         // Encode the book name for use in a query string
-        const bookName = encodeURIComponent(generalInput.value);
-        const url = `/gen?book_name=${bookName}`;
+        const user_input = encodeURIComponent(generalInput.value);
+        const url = `/gen?user_input=${user_input}`;
 
         const eventSource = new EventSource(url);
 
@@ -105,72 +63,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
-
     async function generateBookPromotionText() {
-        // Elements and loading indication
-        const loadingDiv = document.getElementById('general-loading');
+        const loadingDiv = document.getElementById('book-loading');
         loadingDiv.style.display = 'block';
-        console.log("Loading display set to block");
+        copyBookTextBtn.style.display = 'None';
+        bookOutput.innerHTML = '';
 
-        // Clear previous output
-        generalOutput.innerHTML = '';
-
-        // Encode the book name for use in a query string
-        const bookName = encodeURIComponent(generalInput.value);
+        const bookName = encodeURIComponent(bookNameInput.value);
         const url = `/genbook?book_name=${bookName}`;
 
-        const eventSource = new EventSource(url);
+        try {
+            const response = await fetch(url);
+            const reader = response.body.getReader();
 
-        // Handle a message event
-        eventSource.onmessage = function (event) {
-            if (event.data === "Stream closed") {
-                console.log("Stream closed by the server");
-                eventSource.close();
-                copyTextBtn.style.display = 'block';
-                loadingDiv.style.display = 'none';
-                // Any additional cleanup here
-            } else {
-                // Normal handling of messages
-                console.log(event.data);
-                generalOutput.innerHTML += event.data.replace(/\n/g, '<br>');
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = new TextDecoder("utf-8").decode(value);
+
+                try {
+                    const data = JSON.parse(chunk);
+                    if (data.message === "Stream closed") {
+                        copyBookTextBtn.style.display = 'block';
+                        loadingDiv.style.display = 'none';
+                    } else if (data.error) {
+                        console.error('Error:', data.error);
+                        bookOutput.textContent = 'Error generating text. Please try again.';
+                        loadingDiv.style.display = 'none';
+                    } else {
+                        bookOutput.innerHTML += `${data.replace(/\n/g, '<br>')}`;
+                    }
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                }
             }
-        };
-
-        // eventSource.addEventListener('add', event => {
-        //     console.log(event.data);
-        //     generalOutput.innerHTML += event.data.replace(/\\n/g, '<br>');
-        // });
-
-        // Handle an error event
-        eventSource.onerror = function (error) {
-            console.error('There was a problem with the event stream:', error);
-            console.log('EventSource readyState:', eventSource.readyState);
-
-            if (eventSource.readyState === EventSource.CLOSED) {
-                console.log('EventSource connection was closed.');
-            } else if (eventSource.readyState === EventSource.CONNECTING) {
-                console.log('EventSource is trying to connect.');
-            } else {
-                console.log('EventSource is open.');
-            }
-
-            // Add a conditional check here to handle different states
-            if (eventSource.readyState !== EventSource.OPEN) {
-                generalOutput.textContent = 'Error generating text. Please try again.';
-                eventSource.close(); // Close the connection
-                loadingDiv.style.display = 'none'; // Hide the loading indicator
-            }
-        };
-
-
-        // Optional: Handle stream completion (if the server sends a specific event to indicate this)
-        // Adjust this part according to your server-side implementation
-        eventSource.addEventListener('finish', () => {
-            eventSource.close(); // Close the connection
-            copyTextBtn.style.display = 'block'; // Show the copy text button
-            loadingDiv.style.display = 'none'; // Hide the loading indicator
-        });
+        } catch (error) {
+            console.error('Fetch error:', error);
+            bookOutput.textContent = 'Error generating text. Please try again.';
+            loadingDiv.style.display = 'none';
+        }
     }
+
+
 
     function copyText(outputElem) {
         if (!outputElem.textContent) return;
