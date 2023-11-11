@@ -47,6 +47,7 @@ def zhipuai_package_demo_sse(key):
         ],
         temperature=0.9,
     )
+
     for event in response.events():
         if event.event == "add":
             # Print data continuously with controlled line breaks

@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //     }
     // }
 
+
     async function generateGeneralText() {
         // Elements and loading indication
         const loadingDiv = document.getElementById('general-loading');
@@ -74,6 +75,49 @@ document.addEventListener('DOMContentLoaded', () => {
         // Encode the book name for use in a query string
         const bookName = encodeURIComponent(generalInput.value);
         const url = `/gen?book_name=${bookName}`;
+
+        const eventSource = new EventSource(url);
+
+        // Handle a message event
+        eventSource.onmessage = function (event) {
+            console.log(event.data);
+            generalOutput.innerHTML += event.data.replace(/\n/g, '<br>');
+        };
+
+        // Handle stream completion
+        eventSource.addEventListener('stream-end', () => {
+            console.log("Stream closed by the server");
+            eventSource.close(); // Close the connection
+            copyTextBtn.style.display = 'block'; // Show the copy text button
+            loadingDiv.style.display = 'none'; // Hide the loading indicator
+        });
+
+        eventSource.onerror = function (error) {
+            if (eventSource.readyState === EventSource.CLOSED) {
+                console.log('EventSource connection was closed.');
+            } else {
+                console.error('There was a problem with the event stream:', error);
+                generalOutput.textContent = 'Error generating text. Please try again.';
+                loadingDiv.style.display = 'none'; // Hide the loading indicator
+            }
+            eventSource.close(); // Close the connection
+        };
+
+    }
+
+
+    async function generateBookPromotionText() {
+        // Elements and loading indication
+        const loadingDiv = document.getElementById('general-loading');
+        loadingDiv.style.display = 'block';
+        console.log("Loading display set to block");
+
+        // Clear previous output
+        generalOutput.innerHTML = '';
+
+        // Encode the book name for use in a query string
+        const bookName = encodeURIComponent(generalInput.value);
+        const url = `/genbook?book_name=${bookName}`;
 
         const eventSource = new EventSource(url);
 
@@ -126,24 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
             copyTextBtn.style.display = 'block'; // Show the copy text button
             loadingDiv.style.display = 'none'; // Hide the loading indicator
         });
-    }
-
-
-    async function generateBookPromotionText() {
-        const briefing = sourceSelection.value === 'manual' ? bookBriefingInput.value : null;
-        const response = await fetch('/gen', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                book_name: bookNameInput.value,
-                book_briefing: briefing
-            })
-        });
-        const data = await response.json();
-        bookOutput.textContent = data.intro;
-        copyBookTextBtn.style.display = 'block';
     }
 
     function copyText(outputElem) {
