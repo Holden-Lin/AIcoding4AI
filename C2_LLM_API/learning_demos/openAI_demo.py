@@ -1,10 +1,15 @@
 import openai
+from importlib.metadata import version
 from dotenv import load_dotenv, find_dotenv
 import os
+
+print("openai verision: {} ".format(version("openai")))
+
 
 _ = load_dotenv(find_dotenv())
 openai.api_key = os.environ["openai_api_key"]
 print("* openai api key loaded")
+openai.api_base = "https://smartprompts.net"
 
 name = "聪明的阅读者"
 book_summary = """
