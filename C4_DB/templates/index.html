@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玄应灵感助手</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+
+<body>
+    <main>
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button" onclick="showSection('general')">灵感生成大师</button>
+            <button class="tab-button" onclick="showSection('promotion')">书籍推广大师</button>
+        </div>
+
+        <!-- General Text Generation Section -->
+        <section id="general-text-generation" class="tab-content">
+            <h2>灵感生成大师</h2>
+            <textarea id="general-input" placeholder="请输入您想生成的内容..." class="large-input"></textarea>
+
+            <div class="button-container">
+                <button id="generate-text">生成灵感</button>
+            </div>
+
+            <div id="general-output" class="output-box"></div>
+
+            <div class="button-container">
+                <button id="copy-text" style="display:none;">复制灵感</button>
+            </div>
+
+            <div id="general-loading" class="loading-interface" style="display:none;">灵感生成中...</div>
+        </section>
+
+        <!-- Book Promotion Text Generation Section -->
+        <section id="book-promotion-generation" class="tab-content" style="display:none;">
+            <h2>书籍推广灵感生成</h2>
+            <input type="text" id="book-name-input" placeholder="请输入书籍的名字...">
+
+            <div class="button-container">
+                <button id="generate-book-text">生成灵感</button>
+            </div>
+
+            <div id="book-output" class="output-box"></div>
+            <div id="book-loading" class="loading-interface" style="display:none;">灵感生成中...</div>
+            <button id="copy-book-text" style="display:none;">复制灵感</button>
+        </section>
+    </main>
+    <script src="../static/script.js"></script>
+</body>
+
+</html>
