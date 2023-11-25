@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +8,9 @@ from C2_LLM_API.GenBookIntro import BookPromoter
 import C2_LLM_API.learning_demos.openAI_demo as openAI_demo
 
 from sse_starlette.sse import EventSourceResponse
+from .database import schemas, crud
+from .database.database import SessionLocal
+from sqlalchemy.orm import Session
 
 gener = BookPromoter()
 app = FastAPI()
@@ -15,6 +18,15 @@ app = FastAPI()
 templates = Jinja2Templates(directory="W3/templates")
 # Serving Static Files
 app.mount("/static", StaticFiles(directory="W3/static"), name="static")
+
+
+def get_db():
+    print("* creating db session")
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -43,6 +55,12 @@ async def generate_anything(book_name: str):
             yield dict(data=chunk)
 
     return EventSourceResponse(event_generator())
+
+
+@app.post("/save", response_model=schemas.Writing)
+def create_writing(writing: schemas.WritingCreate, db: Session = Depends(get_db)):
+    result = crud.create_writing(db=db, writing=writing)
+    return result
 
 
 if __name__ == "__main__":

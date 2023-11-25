@@ -15,10 +15,21 @@ from .models import Post
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_all_tables()
+    # This is used to divide the lifespan into two parts: before and after the yield. \
+    # The code before the yield is executed when the application starts up, and the code after yield (if there were any)\
+    #  would be executed when the application shuts down
     yield
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+async def pagination(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=0),
+) -> tuple[int, int]:
+    capped_limit = min(100, limit)
+    return (skip, capped_limit)
 
 
 @app.post(
@@ -31,7 +42,7 @@ async def create_post(
     session: AsyncSession = Depends(get_async_session),
 ) -> Post:
     # ** change dict into keyword arguments so that they fit in db format
-    post = Post(**post_create.dict())
+    post = Post(**post_create.model_dump())
     session.add(post)
     await session.commit()
     return post

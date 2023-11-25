@@ -20,6 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBookTextBtn.addEventListener('click', () => generateBookPromotionText());
     copyBookTextBtn.addEventListener('click', () => copyText(bookOutput));
 
+    // after stream data is collcted, use this function to save data to db
+    async function saveDataToServer(data) {
+        fetch('/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data })
+        });
+    }
 
     async function generateGeneralText() {
         // Elements and loading indication
@@ -29,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clear previous output
         generalOutput.innerHTML = '';
+        // save stream data and write to db later
+        let accumulatedData = "";
 
         // Encode the book name for use in a query string
         const user_input = encodeURIComponent(generalInput.value);
@@ -38,8 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle a message event
         eventSource.onmessage = function (event) {
-            console.log(event.data);
+            //console.log(event.data);
             generalOutput.innerHTML += event.data.replace(/\n/g, '<br>');
+            accumulatedData += event.data;
         };
 
         // Handle stream completion
@@ -48,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             eventSource.close(); // Close the connection
             copyTextBtn.style.display = 'block'; // Show the copy text button
             loadingDiv.style.display = 'none'; // Hide the loading indicator
+            saveDataToServer(accumulatedData);
         });
 
         eventSource.onerror = function (error) {
