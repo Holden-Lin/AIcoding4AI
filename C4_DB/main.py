@@ -1,32 +1,44 @@
-import uvicorn
-from fastapi import FastAPI, Request, Depends
+import uvicorn, contextlib
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 from C2_LLM_API.GenBookIntro import BookPromoter
 import C2_LLM_API.learning_demos.openAI_demo as openAI_demo
+from common.count_tokens import count_tokens
 
 from sse_starlette.sse import EventSourceResponse
-from .database import schemas, crud
-from .database.database import SessionLocal
-from sqlalchemy.orm import Session
 
+# use absolute import in main script
+from database import schemas, crud
+from database.database import SessionLocal, create_tables
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from datetime import datetime
+from typing import List
+
+import traceback
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_tables()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 gener = BookPromoter()
-app = FastAPI()
 # remember to set PYTHONPATH to the root directory and then run
-templates = Jinja2Templates(directory="W3/templates")
+templates = Jinja2Templates(directory="C4_DB/templates")
 # Serving Static Files
-app.mount("/static", StaticFiles(directory="W3/static"), name="static")
+app.mount("/static", StaticFiles(directory="C4_DB/static"), name="static")
 
 
-def get_db():
+async def get_db():
     print("* creating db session")
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async with SessionLocal() as session:
+        yield session
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -44,23 +56,49 @@ async def generate_book_intro(book_name: str):
 
 
 @app.get("/gen")
-async def generate_anything(book_name: str):
-    completions = openAI_demo.gen(book_name)
+async def generate_anything(
+    user_input: str, user_ip: str, db: AsyncSession = Depends(get_db)
+):
+    # Create initial entry with prompt and create_time
+    writing_create = schemas.WritingCreate(
+        prompt=user_input,
+        creat_time=datetime.now(),
+        prompt_tokens=count_tokens(user_input),
+        user_ip=user_ip,
+    )
+    try:
+        print("* creating database transaction")
+        writing_entry = await crud.create_writing(db, writing_create)
+    except Exception as e:
+        traceback_str = "".join(traceback.format_tb(e.__traceback__))
+        error_msg = f"{e.__class__.__name__}: {e}\n{traceback_str}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    print("* generating model output")
+    completions = openAI_demo.gen(user_input)
 
     async def event_generator():
+        # Send the ID as the first event
+        yield dict(data=str(writing_entry.id), event="init-id")
+        print("* yielding output")
+
         for chunk in completions:
             if chunk is None:
                 yield dict(data="Stream closed", event="stream-end")
                 break
             yield dict(data=chunk)
 
+        # Update the database entry after streaming ends
+        await crud.update_writing(db, writing_entry.id, {"finish_time": datetime.now()})
+
     return EventSourceResponse(event_generator())
 
 
-@app.post("/save", response_model=schemas.Writing)
-def create_writing(writing: schemas.WritingCreate, db: Session = Depends(get_db)):
-    result = crud.create_writing(db=db, writing=writing)
-    return result
+@app.get("/get_history/{user_ip}", response_model=List[schemas.Writing])
+def get_history(user_ip: str, db: AsyncSession = Depends(get_db)):
+    history = crud.get_writings_by_ip(db, user_ip=user_ip)
+    return history
 
 
 if __name__ == "__main__":

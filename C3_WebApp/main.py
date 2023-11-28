@@ -12,9 +12,9 @@ from sse_starlette.sse import EventSourceResponse
 gener = BookPromoter()
 app = FastAPI()
 # remember to set PYTHONPATH to the root directory and then run
-templates = Jinja2Templates(directory="W3/templates")
+templates = Jinja2Templates(directory="C3_WebApp/templates")
 # Serving Static Files
-app.mount("/static", StaticFiles(directory="W3/static"), name="static")
+app.mount("/static", StaticFiles(directory="C3_WebApp/static"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)

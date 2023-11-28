@@ -9,7 +9,7 @@ print("openai verision: {} ".format(version("openai")))
 _ = load_dotenv(find_dotenv())
 openai.api_key = os.environ["openai_api_key"]
 print("* openai api key loaded")
-openai.api_base = "https://smartprompts.net"
+openai.base_url = os.environ["cf_openai_gateway"]
 
 name = "聪明的阅读者"
 book_summary = """

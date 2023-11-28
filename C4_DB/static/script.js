@@ -20,16 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBookTextBtn.addEventListener('click', () => generateBookPromotionText());
     copyBookTextBtn.addEventListener('click', () => copyText(bookOutput));
 
-    // after stream data is collcted, use this function to save data to db
-    async function saveDataToServer(data) {
-        fetch('/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ data: data })
-        });
+    // get user ip as the user's identifier
+    async function getUserIP() {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
     }
+
+    // after stream data is collcted, use this function to save data to db
+    async function saveDataToServer(writingId, answerData) {
+        const updateData = {
+            answer: answerData,
+        };
+
+        try {
+            const response = await fetch(`/update/${writingId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const responseData = await response.json();
+            console.log('Update success:', responseData);
+        } catch (error) {
+            console.error('Error updating writing:', error);
+        }
+    }
+
 
     async function generateGeneralText() {
         // Elements and loading indication
@@ -37,16 +56,26 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingDiv.style.display = 'block';
         console.log("Loading display set to block");
 
+        const userIP = await getUserIP();
+        console.log("current user ip is:", userIP);
+
         // Clear previous output
         generalOutput.innerHTML = '';
+        let writingId;
         // save stream data and write to db later
         let accumulatedData = "";
 
+
         // Encode the book name for use in a query string
         const user_input = encodeURIComponent(generalInput.value);
-        const url = `/gen?user_input=${user_input}`;
+        const url = `/gen?user_input=${user_input}&user_ip=${userIP}`;
 
         const eventSource = new EventSource(url);
+
+        // get Id(db index) to update db later
+        eventSource.addEventListener("init-id", function (event) {
+            writingId = event.data;
+        });
 
         // Handle a message event
         eventSource.onmessage = function (event) {
@@ -61,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             eventSource.close(); // Close the connection
             copyTextBtn.style.display = 'block'; // Show the copy text button
             loadingDiv.style.display = 'none'; // Hide the loading indicator
-            saveDataToServer(accumulatedData);
+            saveDataToServer(writingId, accumulatedAnswer);
         });
 
         eventSource.onerror = function (error) {
@@ -119,6 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function loadHistory() {
+        const userIP = await getUserIP();
+        const response = await fetch(`/get_history?user_ip=${userIP}`);
+        const historyData = await response.json();
+
+        const tbody = document.getElementById('history-table').querySelector('tbody');
+        tbody.innerHTML = '';  // Clear existing content
+
+        historyData.forEach(item => {
+            const row = `<tr>
+            <td>${item.ip}</td>
+            <td>${item.prompt}</td>
+            <td>${item.answer}</td>
+            <td>${item.creat_time}</td>
+        </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+    // Call loadHistory on page load or on a specific user action
+    loadHistory();
 
 
     function copyText(outputElem) {
