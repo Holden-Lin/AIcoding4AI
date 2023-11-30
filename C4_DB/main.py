@@ -36,9 +36,19 @@ app.mount("/static", StaticFiles(directory="C4_DB/static"), name="static")
 
 
 async def get_db():
-    print("* creating db session")
-    async with SessionLocal() as session:
-        yield session
+    db = SessionLocal()
+    try:
+        print("* creating db session")
+        yield db
+    finally:
+        print("* closing db session")
+        await db.close()
+
+
+# async def get_db():
+#     print("* creating db session")
+#     async with SessionLocal() as session:
+#         yield session
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -89,15 +99,27 @@ async def generate_anything(
                 break
             yield dict(data=chunk)
 
-        # Update the database entry after streaming ends
-        await crud.update_writing(db, writing_entry.id, {"finish_time": datetime.now()})
-
     return EventSourceResponse(event_generator())
 
 
+@app.put("/update/{writing_id}", response_model=schemas.Writing)
+async def update_writing_endpoint(
+    writing_id: int,
+    update_data: schemas.WritingUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    print("* updating db after generation")
+    answer_tokens = count_tokens(update_data.answer)
+    update_data.answer_tokens = answer_tokens
+    update_data.finish_time = datetime.now()
+
+    updated_writing = await crud.update_writing(db, writing_id, update_data)
+    return updated_writing
+
+
 @app.get("/get_history/{user_ip}", response_model=List[schemas.Writing])
-def get_history(user_ip: str, db: AsyncSession = Depends(get_db)):
-    history = crud.get_writings_by_ip(db, user_ip=user_ip)
+async def get_history(user_ip: str, db: AsyncSession = Depends(get_db)):
+    history = await crud.get_writings_by_ip(db, user_ip=user_ip)
     return history
 
 

@@ -26,6 +26,13 @@ class WritingCreate(BaseModel):
     # Exclude 'id', 'answer', 'answer_tokens', 'finish_time'
 
 
+class WritingUpdate(BaseModel):
+    answer: Optional[str] = None
+    finish_time: Optional[datetime] = None
+    answer_tokens: Optional[int] = None
+    # Any other fields that might be updated
+
+
 class WritingResponse(Writing):
     pass
     # This can be used for responses, including all fields

@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
             eventSource.close(); // Close the connection
             copyTextBtn.style.display = 'block'; // Show the copy text button
             loadingDiv.style.display = 'none'; // Hide the loading indicator
-            saveDataToServer(writingId, accumulatedAnswer);
+            console.log("updating generation to server");
+            saveDataToServer(writingId, accumulatedData);
         });
 
         eventSource.onerror = function (error) {
