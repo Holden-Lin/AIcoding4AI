@@ -117,7 +117,7 @@ async def update_writing_endpoint(
     return updated_writing
 
 
-@app.get("/get_history/{user_ip}", response_model=List[schemas.Writing])
+@app.get("/get_history", response_model=List[schemas.WritingResponse])
 async def get_history(user_ip: str, db: AsyncSession = Depends(get_db)):
     history = await crud.get_writings_by_ip(db, user_ip=user_ip)
     return history

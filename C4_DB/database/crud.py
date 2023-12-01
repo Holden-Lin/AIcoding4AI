@@ -26,11 +26,11 @@ async def create_writing(db: AsyncSession, writing: schemas.WritingCreate):
     return db_writing
 
 
-async def get_writing_by_id(db: AsyncSession, writing_id: int):
+async def get_writings_by_ip(db: AsyncSession, user_ip: int):
     result = await db.execute(
-        select(models.Writing).filter(models.Writing.id == writing_id)
+        select(models.Writing).filter(models.Writing.user_ip == user_ip)
     )
-    return result.scalar_one_or_none()
+    return result.scalars().all()
 
 
 async def update_writing(

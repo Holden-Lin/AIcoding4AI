@@ -33,6 +33,12 @@ class WritingUpdate(BaseModel):
     # Any other fields that might be updated
 
 
-class WritingResponse(Writing):
-    pass
+class WritingResponse(BaseModel):
+    user_ip: str
+    prompt: str
+    answer: Optional[str] = None
+    creat_time: Optional[datetime] = None
+    finish_time: Optional[datetime] = None
+    prompt_tokens: Optional[int] = None
+    answer_tokens: Optional[int] = None
     # This can be used for responses, including all fields

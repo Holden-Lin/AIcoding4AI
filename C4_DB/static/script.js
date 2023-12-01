@@ -154,19 +154,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`/get_history?user_ip=${userIP}`);
         const historyData = await response.json();
 
+        // Sort historyData by creat_time in descending order
+        historyData.sort((a, b) => new Date(b.creat_time) - new Date(a.creat_time));
+
         const tbody = document.getElementById('history-table').querySelector('tbody');
         tbody.innerHTML = '';  // Clear existing content
 
         historyData.forEach(item => {
             const row = `<tr>
-            <td>${item.ip}</td>
-            <td>${item.prompt}</td>
-            <td>${item.answer}</td>
-            <td>${item.creat_time}</td>
-        </tr>`;
+                <td>${item.user_ip}</td>
+                <td>${item.prompt}</td>
+                <td>${item.answer}</td>
+                <td>${item.creat_time}</td>
+            </tr>`;
             tbody.innerHTML += row;
         });
     }
+
     // Call loadHistory on page load or on a specific user action
     loadHistory();
 
