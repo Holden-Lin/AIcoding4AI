@@ -1,0 +1,12 @@
+[Unit]
+Description=FastAPI app
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/root/nlp/fastapi/C4_DB/main.py
+ExecStart=/root/.pyenv/shims/gunicorn -c /root/nlp/fastapi/C4_DB/gunicorn_conf.py main:app
+
+[Install]
+WantedBy=multi-user.target

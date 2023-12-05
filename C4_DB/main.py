@@ -124,4 +124,4 @@ async def get_history(user_ip: str, db: AsyncSession = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=8000, reload=True, log_level="debug")
+    uvicorn.run("main:app", port=8001, reload=True, log_level="debug")
