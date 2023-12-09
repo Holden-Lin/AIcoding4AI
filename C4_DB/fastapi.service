@@ -5,8 +5,9 @@ After=network.target
 [Service]
 User=root
 Group=root
-WorkingDirectory=/root/nlp/fastapi/C4_DB/main.py
-ExecStart=/root/.pyenv/shims/gunicorn -c /root/nlp/fastapi/C4_DB/gunicorn_conf.py main:app
+WorkingDirectory=/root/nlp/fastapi/C4_DB/
+Environment="PYTHONPATH=/root/nlp/fastapi"
+ExecStart=/root/.pyenv/shims/gunicorn -c gunicorn_conf.py main:app
 
 [Install]
 WantedBy=multi-user.target

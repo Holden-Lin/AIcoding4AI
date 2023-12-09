@@ -29,10 +29,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 gener = BookPromoter()
-# remember to set PYTHONPATH to the root directory and then run
-templates = Jinja2Templates(directory="C4_DB/templates")
-# Serving Static Files
-app.mount("/static", StaticFiles(directory="C4_DB/static"), name="static")
+# need to change directory according to the working directory
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 async def get_db():

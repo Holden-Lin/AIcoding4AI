@@ -20,11 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBookTextBtn.addEventListener('click', () => generateBookPromotionText());
     copyBookTextBtn.addEventListener('click', () => copyText(bookOutput));
 
-    // get user ip as the user's identifier
+    // get user ip as the user's identifier，api.ipify.or大陆无法访问
+    // async function getUserIP() {
+    //     const response = await fetch('https://api.ipify.org?format=json');
+    //     const data = await response.json();
+    //     return data.ip;
+    // }
+
     async function getUserIP() {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
+        const response = await fetch('https://ipv4.icanhazip.com/');
+        const data = await response.text();
+        return data.trim();
     }
 
     // after stream data is collcted, use this function to save data to db
