@@ -61,3 +61,46 @@ The directory of C4_DB is key to deploy a fastapi app to generate text. the proj
 │   ├── trainer.py
 │   └── util.py
 └── requirements.txt
+
+
+the server pip list is 
+aiosqlite          0.19.0
+annotated-types    0.6.0
+anyio              3.7.1
+cachetools         5.3.2
+certifi            2023.11.17
+charset-normalizer 3.3.2
+click              8.1.7
+dataclasses        0.6
+distro             1.8.0
+exceptiongroup     1.2.0
+fastapi            0.104.0
+fire               0.5.0
+greenlet           3.0.1
+gunicorn           21.2.0
+h11                0.14.0
+httpcore           1.0.2
+httpx              0.25.2
+idna               3.6
+Jinja2             3.1.2
+MarkupSafe         2.1.3
+openai             1.3.7
+packaging          23.2
+pip                21.2.4
+pydantic           2.5.2
+pydantic_core      2.14.5
+PyJWT              2.8.0
+python-dotenv      1.0.0
+requests           2.31.0
+setuptools         58.1.0
+six                1.16.0
+sniffio            1.3.0
+SQLAlchemy         2.0.18
+sse-starlette      1.6.5
+starlette          0.27.0
+termcolor          2.3.0
+tqdm               4.66.1
+typing_extensions  4.8.0
+urllib3            2.1.0
+uvicorn            0.23.2
+zhipuai            1.0.7
